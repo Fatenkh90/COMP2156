@@ -26,5 +26,39 @@ jobs:
         with:
           node-version: "14.x"
       
+      # - name: Install dependencies
+      #   run: npm install
+      
+      # - name: Install yarn
+      #   run: npm install -g yarn
+      
+      # - name: build yarn
+      #   run: yarn build
+          
+      
+      # - name: Move index.html to 404.html
+      #   run: mv build/index.html build/404.html
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install -g yarn
+      - name: Build app
+        run: yarn build
+      - name: Move index.html to 404.html
+        run: mv build/index.html build/404.html
+        
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./build
+        if: github.ref == 'refs/heads/master'
